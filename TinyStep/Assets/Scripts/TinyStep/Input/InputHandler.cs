@@ -14,7 +14,7 @@ namespace TinyStep.Input
         protected override void OnUpdate()
         {
             var blockMatrixData = GetSingleton<BlockMatrixData>();
-            if (blockMatrixData.MovingBlockCount > 0 && blockMatrixData.BlockCount != 81) return;
+            if (blockMatrixData.MovingBlockCount > 0 || blockMatrixData.DestroyedBlockCount > 0) return;
             
             var input = World.GetExistingSystem<Unity.Tiny.Input.InputSystem>();
             if (InputUtil.GetInputDown(input))
