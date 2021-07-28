@@ -6,12 +6,18 @@ namespace TinyStep.Tweener
 {
     public class Ease : SystemBase
     {
+        private EndSimulationEntityCommandBufferSystem _endSimulationEntityCommandBufferSystem;
+        protected override void OnCreate()
+        {
+            RequireSingletonForUpdate<BlockMatrixData>();
+            _endSimulationEntityCommandBufferSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
+        }
         protected override void OnUpdate()
         {
-        
-        
+            var ecb = _endSimulationEntityCommandBufferSystem.CreateCommandBuffer().AsParallelWriter();
+            
             Entities
-                .ForEach((ref Translation translation,in MoveOrder moveOrder) =>
+                .ForEach((Entity entity,ref Translation translation,in MoveOrder moveOrder) =>
                 {
                     float currentTime = Tweener.GetTime();
                     float3 startPos = moveOrder.start;
@@ -19,15 +25,18 @@ namespace TinyStep.Tweener
                     var orderEndTime = moveOrder.startTime + moveOrder.duration;
                     if (currentTime > orderEndTime)
                     {
-                        
+                        ecb.RemoveComponent<MoveOrder>(0,entity);
+                        ecb.AddComponent<MoveOrderOnComplete>(1,entity);
                         return;
                     }
                     var percentage = (currentTime - moveOrder.startTime) / moveOrder.duration;
-                    var ease = moveOrder.MyEaseMethod.Invoke(percentage);
+                    var ease = EaseJobs.Linear(percentage);
                     float3 trns = translation.Value;
-                    moveOrder.MyActionMethod.Invoke(ref trns,ref startPos,ref endPos, ease);
+                    ActionJobs.Float3To(ref trns,ref startPos,ref endPos, ease);
                     translation.Value = trns;
                 }).Schedule();
+            _endSimulationEntityCommandBufferSystem.AddJobHandleForProducer(this.Dependency);
+
         }
     }
 }

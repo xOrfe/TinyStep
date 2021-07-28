@@ -18,21 +18,17 @@ namespace TinyStep
         
         public float startTime;
         
-        public FunctionPointer<BlockMatrixSystem.OnCompleteTweenDelegate> OnComplete;
-        
-        public FunctionPointer<EaseJobs.EaseTypeDelegate> MyEaseMethod;
-        
-        public FunctionPointer<ActionJobs.ActionTypeDelegate> MyActionMethod;
-        
-        public MoveOrder(in float3 _start, in float3 _end, in float _duration,FunctionPointer<BlockMatrixSystem.OnCompleteTweenDelegate> _onComplete)
+        public MoveOrder(in float3 _start, in float3 _end, in float _duration)
         {
             start = _start;
             end = _end;
             duration = _duration;
             startTime = Tweener.Tweener.GetTime();
-            OnComplete = _onComplete;
-            MyEaseMethod = BurstCompiler.CompileFunctionPointer<EaseJobs.EaseTypeDelegate>(EaseJobs.Linear);
-            MyActionMethod = BurstCompiler.CompileFunctionPointer<ActionJobs.ActionTypeDelegate>(ActionJobs.Float3To);
         }
     }
+    
+    [Serializable] public struct MoveOrderOnComplete : IComponentData {}
+    [Serializable] public struct SetCrews : IComponentData {}
+    [Serializable] public struct SetFallDowns : IComponentData {}
+    
 }

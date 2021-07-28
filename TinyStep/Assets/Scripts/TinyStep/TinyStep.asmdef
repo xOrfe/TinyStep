@@ -17,8 +17,7 @@
         "Unity.Burst",
         "Unity.Tiny.2D",
         "Unity.Tiny.2D.Native",
-        "Unity.2D.Entities.Physics",
-        "Timespawn.EntityTween"
+        "Unity.2D.Entities.Physics"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

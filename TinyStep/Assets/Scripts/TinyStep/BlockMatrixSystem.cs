@@ -2,57 +2,93 @@
 using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.Tiny;
 using Unity.Transforms;
 using AOT;
+using TinyStep.Input;
+using TinyStep.Utils;
+using UnityEngine;
+using Sprite = Unity.Tiny.Sprite;
+using SpriteRenderer = Unity.Tiny.SpriteRenderer;
+using Tween = TinyStep.Tweener.Tweener;
+
 namespace TinyStep
 {
     public class BlockMatrixSystem : SystemBase
     {
-        private BlockMatrixData _blockMatrixData;
         private EndSimulationEntityCommandBufferSystem _endSimulationEntityCommandBufferSystem;
-
+        private EntityArchetype _blockAcheType;
         protected override void OnCreate()
         {
-            _blockMatrixData = GetSingleton<BlockMatrixData>();
+
             RequireSingletonForUpdate<BlockMatrixData>();
+            RequireSingletonForUpdate<InputData>();
+            RequireSingletonForUpdate<BlockSpawnComponent>();
             _endSimulationEntityCommandBufferSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
         }
         
         protected override void OnStartRunning()
         {
-            var ecb = _endSimulationEntityCommandBufferSystem.CreateCommandBuffer().AsParallelWriter();
+
+            var ecb = _endSimulationEntityCommandBufferSystem.CreateCommandBuffer();
+            var blockMatrixData = GetSingleton<BlockMatrixData>();
+            var prefabContainer = GetSingleton<BlockSpawnComponent>();
             
+            _blockAcheType = EntityManager.CreateArchetype(typeof(Translation),typeof(Rotation),typeof(Block));
+            
+            int matrixLength = blockMatrixData.BlockCount;
+
+            for (int i = 0; i < matrixLength; i++)
+            {
+                Entity spawnedEntity = EntityManager.CreateEntity(_blockAcheType);
+                Translation trns = new Translation()
+                {
+                    Value = new float3(BlockMatrixUtilities.GetBlockPositionLocal(i,blockMatrixData.BlockMatrixDefinition.MatrixScale,blockMatrixData.BlockMatrixDefinition.OneBlockScale))
+                };
+                EntityManager.SetComponentData(spawnedEntity,trns);
+            }
+            _endSimulationEntityCommandBufferSystem.AddJobHandleForProducer(this.Dependency);
+        }
+        
+        protected override void OnUpdate()
+        {
+            var ecb = _endSimulationEntityCommandBufferSystem.CreateCommandBuffer();
+            var blockMatrixData = GetSingleton<BlockMatrixData>();
+
             Entities.
-                WithAll<Block>().
-                ForEach((Entity entity,in Translation translation) => {
-                    FunctionPointer<OnCompleteTweenDelegate> onComplete = BurstCompiler.CompileFunctionPointer<OnCompleteTweenDelegate>(OnCompleteTween);
-                    Tweener.Tweener.Move(ecb,0, entity, translation.Value, new float3(20.0f, 20.0f, 0), 1.0f,onComplete);
+                WithAll<MoveOrderOnComplete>().
+                ForEach((Entity entity) => {
+                    blockMatrixData.ABlockStopMoving();
                     
-                }).Schedule();
+                    World.EntityManager.RemoveComponent<MoveOrderOnComplete>(entity);
+                }).WithoutBurst().WithStructuralChanges().Run();
+            
+            
+            
+            var activeInput = GetSingleton<InputData>();
+            
+            if (!activeInput.IsTouchExecuted)
+            {
+                Entities.
+                    WithAll<Block>().
+                    ForEach((Entity entity,in Translation translation) => {
+                        Tween.Move(ecb, entity, translation.Value, new float3(activeInput.Pos.x,activeInput.Pos.y,0), 1.0f);
+                        blockMatrixData.ABlockStartMoving();
+                    }).WithoutBurst().Run();
+                
+                
+                activeInput.IsTouchExecuted = true;
+                SetSingleton(activeInput);
+            }
+            
+            
+            
             _endSimulationEntityCommandBufferSystem.AddJobHandleForProducer(this.Dependency);
         }
 
-        protected override void OnUpdate()
-        {
-            
-        }
-        
         [BurstCompile]
-        [MonoPInvokeCallback(typeof(OnCompleteTweenDelegate))]
-        public void OnCompleteTween()
+        public void CreateBlock()
         {
-            var blockMatrixData = new BlockMatrixData()
-            {
-                BlockCount = _blockMatrixData.BlockCount,
-                MovingBlockCount =  _blockMatrixData.MovingBlockCount - 1
-            };
             
-            SetSingleton(blockMatrixData);
-            
-            _blockMatrixData = GetSingleton<BlockMatrixData>();
         }
-        public delegate void OnCompleteTweenDelegate ();
-
     }
 }

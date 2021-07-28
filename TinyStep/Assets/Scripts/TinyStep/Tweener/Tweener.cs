@@ -13,12 +13,19 @@ namespace TinyStep.Tweener
             in Entity entity, 
             in float3 start, 
             in float3 end, 
-            in float duration,
-            in FunctionPointer<BlockMatrixSystem.OnCompleteTweenDelegate> onComplete)
+            in float duration)
         {
-            parallelWriter.AddComponent(sortKey, entity, new MoveOrder(start,end,duration,onComplete));
+            parallelWriter.AddComponent(sortKey, entity, new MoveOrder(start,end,duration));
         }
-
+        public static void Move(
+            in EntityCommandBuffer entityCommandBuffer, 
+            in Entity entity, 
+            in float3 start, 
+            in float3 end, 
+            in float duration)
+        {
+            entityCommandBuffer.AddComponent(entity,new MoveOrder(start,end,duration) );
+        }
         public static float GetTime()
         {
             return Time.time;
