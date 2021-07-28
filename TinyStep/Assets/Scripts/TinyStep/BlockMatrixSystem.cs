@@ -5,6 +5,7 @@ using Unity.Mathematics;
 using Unity.Transforms;
 using TinyStep.Input;
 using TinyStep.Utils;
+using Unity.Tiny;
 using Debug = Unity.Tiny.Debug;
 using SpriteRenderer = Unity.Tiny.SpriteRenderer;
 using Tween = TinyStep.Tweener.Tweener;
@@ -36,15 +37,23 @@ namespace TinyStep
             var blockMatrixData = GetSingleton<BlockMatrixData>();
             var sceneTag = EntityManager.GetSharedComponentData<SceneTag>(blockSpawnerEntity);
             var sceneSection = EntityManager.GetSharedComponentData<SceneSection>(blockSpawnerEntity);
+            var localToWorld = EntityManager.GetComponentData<LocalToWorld>(blockSpawnerEntity);
             
-            _blockAcheType = EntityManager.CreateArchetype(typeof(SceneTag),typeof(SceneSection),typeof(SpriteRenderer),typeof(Translation),typeof(Rotation),typeof(Block));
+            _blockAcheType = EntityManager.CreateArchetype(
+                typeof(SceneTag),
+                typeof(SceneSection),
+                typeof(SpriteRenderer),
+                typeof(LocalToWorld),
+                typeof(Translation),
+                typeof(Rotation),
+                typeof(Block)
+                );
             
             int matrixLength = blockMatrixData.BlockCount;
 
             for (int i = 0; i < matrixLength; i++)
             {
-                
-                Entity spawnedEntity = EntityManager.CreateEntity(_blockAcheType);
+                Entity spawnedEntity = EntityManager.Instantiate(blockSpawner.Prefab);
                 blockPrefabSpriteRenderer.Sprite = blockSprites.Sprite; 
                 EntityManager.SetComponentData(spawnedEntity,blockPrefabSpriteRenderer);
                 Translation trns = new Translation()
@@ -52,11 +61,6 @@ namespace TinyStep
                     Value = new float3(BlockMatrixUtilities.GetBlockPositionLocal(i,blockMatrixData.BlockMatrixDefinition.MatrixScale,blockMatrixData.BlockMatrixDefinition.OneBlockScale))
                 };
                 EntityManager.SetComponentData(spawnedEntity,trns);
-                
-                
-                EntityManager.SetSharedComponentData(spawnedEntity,sceneTag);
-                EntityManager.SetSharedComponentData(spawnedEntity,sceneSection);
-                
                 
                 Debug.Log(EntityManager.GetComponentData<Translation>(spawnedEntity).Value);
             }
