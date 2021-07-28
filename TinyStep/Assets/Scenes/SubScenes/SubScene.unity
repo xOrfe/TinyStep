@@ -291,7 +291,7 @@ MonoBehaviour:
     matrixScale:
       x: 9
       y: 9
-    oneBlockScale: 1
+    oneBlockScale: 6.6
 --- !u!114 &1760247355
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3105814071658984227}
   - component: {fileID: 2946950381438025702}
+  - component: {fileID: 4667418660149833348}
   m_Layer: 0
   m_Name: RedBlock
   m_TagString: Untagged
@@ -83,3 +84,15 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &4667418660149833348
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3105814071658984224}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 07f172930c30f1943acee0cbf73cf239, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

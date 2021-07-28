@@ -5,6 +5,7 @@ using Unity.Mathematics;
 using Unity.Transforms;
 using TinyStep.Input;
 using TinyStep.Utils;
+using Unity.Collections;
 using Unity.Tiny;
 using Debug = Unity.Tiny.Debug;
 using SpriteRenderer = Unity.Tiny.SpriteRenderer;
@@ -16,57 +17,57 @@ namespace TinyStep
     {
         private EndSimulationEntityCommandBufferSystem _endSimulationEntityCommandBufferSystem;
         private EntityArchetype _blockAcheType;
+        private Random _Random;
+        
+        private NativeArray<BlockSprite> _blockSprites;
+        private SpriteRenderer _spriteRenderer;
         protected override void OnCreate()
         {
             RequireSingletonForUpdate<BlockSpawner>();
             RequireSingletonForUpdate<BlockMatrixData>();
             RequireSingletonForUpdate<InputData>();
             _endSimulationEntityCommandBufferSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
+            _Random = new Random(54455474);
+
         }
         
         protected override void OnStartRunning()
         {
-            var ecb = _endSimulationEntityCommandBufferSystem.CreateCommandBuffer();
 
+            var blockMatrixData = GetSingleton<BlockMatrixData>();
             var blockSpawner = GetSingleton<BlockSpawner>();
             var blockSpawnerEntity = GetSingletonEntity<BlockSpawner>();
-            var blockSprites = EntityManager.GetBuffer<BlockSprite>(blockSpawnerEntity).ElementAt(0);
             
-            var blockPrefabSpriteRenderer = EntityManager.GetComponentData<SpriteRenderer>(blockSpawner.Prefab);
-            
-            var blockMatrixData = GetSingleton<BlockMatrixData>();
-            var sceneTag = EntityManager.GetSharedComponentData<SceneTag>(blockSpawnerEntity);
-            var sceneSection = EntityManager.GetSharedComponentData<SceneSection>(blockSpawnerEntity);
-            var localToWorld = EntityManager.GetComponentData<LocalToWorld>(blockSpawnerEntity);
-            
-            _blockAcheType = EntityManager.CreateArchetype(
-                typeof(SceneTag),
-                typeof(SceneSection),
-                typeof(SpriteRenderer),
-                typeof(LocalToWorld),
-                typeof(Translation),
-                typeof(Rotation),
-                typeof(Block)
-                );
-            
-            int matrixLength = blockMatrixData.BlockCount;
+            _blockSprites = EntityManager.GetBuffer<BlockSprite>(blockSpawnerEntity).AsNativeArray();
+            _spriteRenderer = EntityManager.GetComponentData<SpriteRenderer>(blockSpawner.Prefab);
 
+
+            
+            var ecb = _endSimulationEntityCommandBufferSystem.CreateCommandBuffer();
+            int matrixLength = blockMatrixData.BlockCount;
             for (int i = 0; i < matrixLength; i++)
             {
-                Entity spawnedEntity = EntityManager.Instantiate(blockSpawner.Prefab);
-                blockPrefabSpriteRenderer.Sprite = blockSprites.Sprite; 
-                EntityManager.SetComponentData(spawnedEntity,blockPrefabSpriteRenderer);
-                Translation trns = new Translation()
-                {
-                    Value = new float3(BlockMatrixUtilities.GetBlockPositionLocal(i,blockMatrixData.BlockMatrixDefinition.MatrixScale,blockMatrixData.BlockMatrixDefinition.OneBlockScale))
-                };
-                EntityManager.SetComponentData(spawnedEntity,trns);
-                
-                Debug.Log(EntityManager.GetComponentData<Translation>(spawnedEntity).Value);
+                CreateBlock(i,ecb);
             }
-            
             _endSimulationEntityCommandBufferSystem.AddJobHandleForProducer(this.Dependency);
+            
 
+        }
+        [BurstCompile]
+        public void CreateBlock(int matrixIndex,EntityCommandBuffer ecb)
+        {
+            var blockMatrixData = GetSingleton<BlockMatrixData>();
+            var blockSpawner = GetSingleton<BlockSpawner>();
+            
+
+            Entity spawnedEntity = EntityManager.Instantiate(blockSpawner.Prefab);
+            _spriteRenderer.Sprite = _blockSprites[_Random.NextInt(3)].Sprite; 
+            EntityManager.SetComponentData(spawnedEntity,_spriteRenderer);
+            Translation trns = new Translation()
+            {
+                Value = new float3(BlockMatrixUtilities.GetBlockPositionLocal(matrixIndex,blockMatrixData.BlockMatrixDefinition.MatrixScale,blockMatrixData.BlockMatrixDefinition.OneBlockScale))
+            };
+            EntityManager.SetComponentData(spawnedEntity,trns);
         }
         
         protected override void OnUpdate()
@@ -105,10 +106,6 @@ namespace TinyStep
             _endSimulationEntityCommandBufferSystem.AddJobHandleForProducer(this.Dependency);
         }
 
-        [BurstCompile]
-        public void CreateBlock()
-        {
-            
-        }
+        
     }
 }
