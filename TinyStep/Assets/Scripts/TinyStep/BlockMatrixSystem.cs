@@ -39,7 +39,9 @@ namespace TinyStep
             
             _blockMatrixEntity = GetSingletonEntity<BlockSpawner>();
 
-            //i made this with brute force bcz there is no other way includes unsafe options to store array in IComponentData
+            //
+            //i made this with brute force bcz there is no other way including unsafe options to store prefab array in IComponentData which sync go world and entity world
+            //                                                                              
             _blockPrefabs = new NativeArray<Entity>(4,Allocator.Persistent);
             _blockPrefabs[0] = blockSpawner.RedBlockEntity;
             _blockPrefabs[1] = blockSpawner.GreenBlockEntity;
@@ -90,7 +92,6 @@ namespace TinyStep
             var activeInput = GetSingleton<InputData>();
             
             DynamicBuffer<BlockDefinitionBuffer> blockDefinitionBuffers = GetBufferFromEntity<BlockDefinitionBuffer>()[blockMatrixEntity];
-            var blockCrewBuffers = GetBufferFromEntity<BlockCrewBuffer>()[blockMatrixEntity];
 
             if (!activeInput.IsTouchExecuted)
             {
@@ -101,10 +102,13 @@ namespace TinyStep
                     int crewIndex = blockDefinitionBuffers[touchIndex].CrewIndex;
                     if (crewIndex != -1)
                     {
-                        foreach (var i in blockCrewBuffers[crewIndex].Crew)
+                        for (int i = 0; i < blockDefinitionBuffers.Length; i++)
                         {
-                            ecb.DestroyEntity(blockDefinitionBuffers[i].Entity);
-                            blockDefinitionBuffers[i] = new BlockDefinitionBuffer( false);
+                            if (blockDefinitionBuffers[i].CrewIndex == crewIndex)
+                            {
+                                ecb.DestroyEntity(blockDefinitionBuffers[i].Entity);
+                                blockDefinitionBuffers[i] = new BlockDefinitionBuffer( false);
+                            }
                         }
                         EntityManager.AddComponent<SetFallDowns>(blockMatrixEntity);
                     }

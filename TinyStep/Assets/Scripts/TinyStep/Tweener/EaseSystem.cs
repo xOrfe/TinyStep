@@ -52,7 +52,6 @@ namespace TinyStep.Tweener
             SetSingleton(blockMatrixData);
 
             _endSimulationEntityCommandBufferSystem.AddJobHandleForProducer(this.Dependency);
-
         }
     }
 }

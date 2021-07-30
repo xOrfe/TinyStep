@@ -1,11 +1,9 @@
-﻿using System.Linq;
-using TinyStep.DynamicBuffers;
+﻿using TinyStep.DynamicBuffers;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Tiny;
-using Unity.Transforms;
 
 namespace TinyStep
 {
@@ -15,12 +13,24 @@ namespace TinyStep
         {
             public BlockMatrixData BlockMatrixData;
             public NativeArray<BlockDefinitionBuffer> BlockDefinitionBuffers;
-            public NativeArray<BlockCrewBuffer> BlockCrewBuffers;
             
             public void Execute()
             {
+                int crewCount = 0;
                 int matrixLength = BlockMatrixData.BlockMatrixDefinition.MatrixLength;
                 int2 matrixScale = BlockMatrixData.BlockMatrixDefinition.MatrixScale;
+
+                for (int i = 0; i < matrixLength; i++)
+                {
+                    BlockDefinitionBuffer blockDefinitionBuffer = BlockDefinitionBuffers[i];
+                    blockDefinitionBuffer.CrewIndex = -1;
+                    BlockDefinitionBuffers[i] = blockDefinitionBuffer;
+                }
+
+                foreach (var s in BlockDefinitionBuffers)
+                {
+                    Debug.Log(s.CrewIndex);
+                }
                 for (int i = 0; i < matrixLength; i++)
                 {
                     int rightBlockIndex = i + 1;
@@ -31,7 +41,7 @@ namespace TinyStep
                         && BlockDefinitionBuffers[i].BlockType == BlockDefinitionBuffers[rightBlockIndex].BlockType
                         && BlockDefinitionBuffers[i].BlockColor == BlockDefinitionBuffers[rightBlockIndex].BlockColor )
                     {
-                        MatchBlocks(ref BlockDefinitionBuffers,ref BlockCrewBuffers, i, rightBlockIndex);
+                        MatchBlocks(ref BlockDefinitionBuffers,ref crewCount, i, rightBlockIndex);
                     }
                 }
                 
@@ -45,48 +55,35 @@ namespace TinyStep
                         BlockDefinitionBuffers[i].BlockType == BlockDefinitionBuffers[upBlockIndex].BlockType
                         && BlockDefinitionBuffers[i].BlockColor == BlockDefinitionBuffers[upBlockIndex].BlockColor)
                     {
-                        MatchBlocks(ref BlockDefinitionBuffers,ref BlockCrewBuffers, i, upBlockIndex);
+                        MatchBlocks(ref BlockDefinitionBuffers,ref crewCount, i, upBlockIndex);
                     }
                 }
                 
             }
         }
 
-        public static void MatchBlocks(ref NativeArray<BlockDefinitionBuffer> blockDefinitions,ref NativeArray<BlockCrewBuffer> blockCrews,int b1,int b2)
+        public static void MatchBlocks(ref NativeArray<BlockDefinitionBuffer> blockDefinitions,ref int crewCount,int b1,int b2)
         {
             if (blockDefinitions[b1].CrewIndex == -1 && blockDefinitions[b2].CrewIndex == -1)
             {
-                BlockCrewBuffer crew = new BlockCrewBuffer(){};
-                crew.Crew = new FixedListInt64();
-                crew.Crew.Add(b1);
-                crew.Crew.Add(b2);
-
-                NativeList<BlockCrewBuffer> tmpBuffers = new NativeList<BlockCrewBuffer>(Allocator.Temp);
-                tmpBuffers.AddRange(blockCrews);
-                tmpBuffers.Add(crew);
-
-                blockCrews = tmpBuffers;
-                
                 BlockDefinitionBuffer b1Def = blockDefinitions[b1];
-                b1Def.CrewIndex = blockCrews.Length - 1;
+                b1Def.CrewIndex = crewCount;
                 blockDefinitions[b1] = b1Def;
                 
                 BlockDefinitionBuffer b2Def = blockDefinitions[b2];
-                b2Def.CrewIndex = blockCrews.Length - 1;
+                b2Def.CrewIndex = crewCount;
                 blockDefinitions[b2] = b2Def;
+                
+                crewCount++;
             }
             if (blockDefinitions[b1].CrewIndex != -1 && blockDefinitions[b2].CrewIndex == -1)
             {
-                blockCrews[blockDefinitions[b1].CrewIndex].Crew.Add(b2);
-                
                 BlockDefinitionBuffer b2Def = blockDefinitions[b2];
                 b2Def.CrewIndex = blockDefinitions[b1].CrewIndex;
                 blockDefinitions[b2] = b2Def;
             }
             if (blockDefinitions[b1].CrewIndex == -1 && blockDefinitions[b2].CrewIndex != -1)
             {
-                blockCrews[blockDefinitions[b2].CrewIndex].Crew.Add(b1);
-                
                 BlockDefinitionBuffer b1Def = blockDefinitions[b1];
                 b1Def.CrewIndex = blockDefinitions[b2].CrewIndex;
                 blockDefinitions[b1] = b1Def;
@@ -94,15 +91,16 @@ namespace TinyStep
             else
             {
                 int b2TemporaryCrewIndex = blockDefinitions[b2].CrewIndex;
-                foreach (var b2Member in blockCrews[blockDefinitions[b2].CrewIndex].Crew)
+
+                for (int i = 0; i < blockDefinitions.Length; i++)
                 {
-                    blockCrews[blockDefinitions[b1].CrewIndex].Crew.Add(b2Member);
-                    
-                    BlockDefinitionBuffer b2MemberDef = blockDefinitions[b2Member];
-                    b2MemberDef.CrewIndex = blockDefinitions[b1].CrewIndex;
-                    blockDefinitions[b1] = b2MemberDef;
+                    if (blockDefinitions[i].CrewIndex == b2TemporaryCrewIndex)
+                    {
+                        BlockDefinitionBuffer b2MemberDef = blockDefinitions[i];
+                        b2MemberDef.CrewIndex = blockDefinitions[b1].CrewIndex;
+                        blockDefinitions[i] = b2MemberDef;
+                    }
                 }
-                blockCrews[b2TemporaryCrewIndex].Crew.Clear();
             }
         }
 
@@ -114,8 +112,8 @@ namespace TinyStep
             var blockMatrixEntity = GetSingletonEntity<BlockMatrixData>();
             
             var blockMatrixData = GetSingleton<BlockMatrixData>();
-            var blockDefinitionBuffers = GetBufferFromEntity<BlockDefinitionBuffer>(true)[blockMatrixEntity];
-            var blockCrewBuffers = GetBufferFromEntity<BlockCrewBuffer>()[blockMatrixEntity];
+            
+            var blockDefinitionBuffers = GetBufferFromEntity<BlockDefinitionBuffer>()[blockMatrixEntity];
             
             blockMatrixData.StartSetCrews();
             
@@ -124,8 +122,7 @@ namespace TinyStep
             SetCrewsJob setCrewsJob = new SetCrewsJob
             {
                 BlockMatrixData = blockMatrixData,
-                BlockDefinitionBuffers = blockDefinitionBuffers.ToNativeArray(Allocator.TempJob),
-                BlockCrewBuffers = blockCrewBuffers.ToNativeArray(Allocator.TempJob)
+                BlockDefinitionBuffers = blockDefinitionBuffers.ToNativeArray(Allocator.TempJob)
             };
             
             var jobHandle = setCrewsJob.Schedule(inputDeps);
@@ -134,10 +131,9 @@ namespace TinyStep
             
             blockDefinitionBuffers.Clear();
             blockDefinitionBuffers.AddRange(setCrewsJob.BlockDefinitionBuffers);
+            setCrewsJob.BlockDefinitionBuffers.Dispose();
             
-            blockCrewBuffers.Clear();
-            blockCrewBuffers.AddRange(setCrewsJob.BlockCrewBuffers);
-            
+
             EntityManager.RemoveComponent<SetCrews>(blockMatrixEntity);
             blockMatrixData.CompleteSetCrews();
             SetSingleton(blockMatrixData);

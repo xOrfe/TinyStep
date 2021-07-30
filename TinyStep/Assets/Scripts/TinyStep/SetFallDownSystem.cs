@@ -23,7 +23,7 @@ namespace TinyStep
             var ecb = _endSimulationEntityCommandBufferSystem.CreateCommandBuffer();
             var blockMatrixData = GetSingleton<BlockMatrixData>();
             var blockMatrixEntity = GetSingletonEntity<BlockMatrixData>();
-
+            
             DynamicBuffer<BlockDefinitionBuffer> blockDefinitionBuffers = GetBufferFromEntity<BlockDefinitionBuffer>()[blockMatrixEntity];
             
             var setFallDownCount = GetEntityQuery(typeof(SetFallDowns)).CalculateEntityCountWithoutFiltering();

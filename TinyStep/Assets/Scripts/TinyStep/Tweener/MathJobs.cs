@@ -26,7 +26,8 @@ namespace TinyStep.Tweener
 
         public delegate float EaseTypeDelegate(float Value);
     }
-
+    
+    [BurstCompile]
     public class OnCompleteJobs
     {
         [BurstCompile]
