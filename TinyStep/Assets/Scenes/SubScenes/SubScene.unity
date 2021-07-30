@@ -152,7 +152,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &315104471
 MonoBehaviour:
@@ -166,81 +166,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b9f2fb57407e7fe4386f7c0b8f648598, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Sprites:
-  - {fileID: 1515622694917723629, guid: 8c57d99927d43ea4aa70d0ecd742c9e8, type: 3}
-  - {fileID: 1503016370545623098, guid: 8c57d99927d43ea4aa70d0ecd742c9e8, type: 3}
-  - {fileID: 1489830567317918739, guid: 8c57d99927d43ea4aa70d0ecd742c9e8, type: 3}
-  - {fileID: 38433539612607256, guid: 8c57d99927d43ea4aa70d0ecd742c9e8, type: 3}
-  Prefab: {fileID: 2036763048}
---- !u!1001 &1056472668
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 3105814071658984224, guid: 521ca5f675e344b408dadf119287abe8,
-        type: 3}
-      propertyPath: m_Name
-      value: RedBlock
-      objectReference: {fileID: 0}
-    - target: {fileID: 3105814071658984227, guid: 521ca5f675e344b408dadf119287abe8,
-        type: 3}
-      propertyPath: m_RootOrder
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3105814071658984227, guid: 521ca5f675e344b408dadf119287abe8,
-        type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 16.046759
-      objectReference: {fileID: 0}
-    - target: {fileID: 3105814071658984227, guid: 521ca5f675e344b408dadf119287abe8,
-        type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 6.865256
-      objectReference: {fileID: 0}
-    - target: {fileID: 3105814071658984227, guid: 521ca5f675e344b408dadf119287abe8,
-        type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3105814071658984227, guid: 521ca5f675e344b408dadf119287abe8,
-        type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3105814071658984227, guid: 521ca5f675e344b408dadf119287abe8,
-        type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3105814071658984227, guid: 521ca5f675e344b408dadf119287abe8,
-        type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3105814071658984227, guid: 521ca5f675e344b408dadf119287abe8,
-        type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3105814071658984227, guid: 521ca5f675e344b408dadf119287abe8,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3105814071658984227, guid: 521ca5f675e344b408dadf119287abe8,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3105814071658984227, guid: 521ca5f675e344b408dadf119287abe8,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 521ca5f675e344b408dadf119287abe8, type: 3}
+  redBlockPrefab: {fileID: 1215504137088292294, guid: de3ac10abafcc104f8c54dc08df8e635,
+    type: 3}
+  greenBlockPrefab: {fileID: 7527839382064495592, guid: 094c51c5458cc014cba35e39886419f4,
+    type: 3}
+  blueBlockPrefab: {fileID: 5662488655813741248, guid: 31923368c6f57db4ea7a223c0260f0d3,
+    type: 3}
+  yellowBlockPrefab: {fileID: 4812529241548457818, guid: 51dc35019f089a544a5a6e5b02af2975,
+    type: 3}
 --- !u!1 &1760247352
 GameObject:
   m_ObjectHideFlags: 0
@@ -253,7 +186,6 @@ GameObject:
   - component: {fileID: 1760247354}
   - component: {fileID: 1760247357}
   - component: {fileID: 1760247355}
-  - component: {fileID: 1760247356}
   m_Layer: 0
   m_Name: BlockMatrix
   m_TagString: Untagged
@@ -273,7 +205,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1760247354
 MonoBehaviour:
@@ -291,7 +223,7 @@ MonoBehaviour:
     matrixScale:
       x: 9
       y: 9
-    oneBlockScale: 6.6
+    oneBlockScale: 1.28
 --- !u!114 &1760247355
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -301,23 +233,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 1760247352}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f63480c85b4242948aa05e27ac0cbb95, type: 3}
+  m_Script: {fileID: 11500000, guid: 7aec05bc88fe0a442a27909d5b8e49c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Values: 000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
---- !u!114 &1760247356
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1760247352}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3bc45d8a1028d8949b3eddc7efb8840e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Values: 000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 --- !u!114 &1760247357
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -334,9 +252,3 @@ MonoBehaviour:
     x: 0
     y: 0
   IsTouchExecuted: 1
---- !u!1 &2036763048 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3105814071658984224, guid: 521ca5f675e344b408dadf119287abe8,
-    type: 3}
-  m_PrefabInstance: {fileID: 1056472668}
-  m_PrefabAsset: {fileID: 0}

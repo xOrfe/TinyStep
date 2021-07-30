@@ -14,27 +14,43 @@ namespace TinyStep.Tweener
         }
         protected override void OnUpdate()
         {
-            var ecb = _endSimulationEntityCommandBufferSystem.CreateCommandBuffer().AsParallelWriter();
+            var ecb = _endSimulationEntityCommandBufferSystem.CreateCommandBuffer();
+            var ecbParallel = ecb.AsParallelWriter();
+
+            var blockMatrixData = GetSingleton<BlockMatrixData>();
             
+            EntityQuery moveOrderOnStartQuery = GetEntityQuery(typeof(MoveOrderOnStart));
+            EntityQuery moveOrderOnCompleteQuery = GetEntityQuery(typeof(MoveOrderOnComplete));
+            
+            blockMatrixData.BlockStartMoving(moveOrderOnStartQuery.CalculateEntityCount());
+            blockMatrixData.BlockStopMoving(moveOrderOnCompleteQuery.CalculateEntityCount());
+            
+            ecb.RemoveComponentForEntityQuery<MoveOrderOnStart>(moveOrderOnStartQuery);
+            ecb.RemoveComponentForEntityQuery<MoveOrderOnComplete>(moveOrderOnCompleteQuery);
+            
+            float deltaTime = Time.DeltaTime;
             Entities
-                .ForEach((Entity entity,ref Translation translation,in MoveOrder moveOrder) =>
+                .ForEach((Entity entity,ref Translation translation,ref MoveOrder moveOrder) =>
                 {
-                    float currentTime = Tweener.GetTime();
                     float3 startPos = moveOrder.start;
                     float3 endPos = moveOrder.end;
-                    var orderEndTime = moveOrder.startTime + moveOrder.duration;
-                    if (currentTime > orderEndTime)
+                    moveOrder.deltaTime += deltaTime;
+                    if (moveOrder.deltaTime > moveOrder.duration)
                     {
-                        ecb.RemoveComponent<MoveOrder>(0,entity);
-                        ecb.AddComponent<MoveOrderOnComplete>(1,entity);
+                        translation.Value = endPos;
+                        ecbParallel.RemoveComponent<MoveOrder>(0,entity);
+                        ecbParallel.AddComponent<MoveOrderOnComplete>(1,entity);
                         return;
                     }
-                    var percentage = (currentTime - moveOrder.startTime) / moveOrder.duration;
+                    var percentage = moveOrder.deltaTime / moveOrder.duration;
                     var ease = EaseJobs.Linear(percentage);
                     float3 trns = translation.Value;
                     ActionJobs.Float3To(ref trns,ref startPos,ref endPos, ease);
                     translation.Value = trns;
                 }).Schedule();
+            
+            SetSingleton(blockMatrixData);
+
             _endSimulationEntityCommandBufferSystem.AddJobHandleForProducer(this.Dependency);
 
         }

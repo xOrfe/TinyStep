@@ -3,15 +3,7 @@
 namespace TinyStep
 {
     [GenerateAuthoringComponent]
-    public struct Block : IComponentData
-    {
-    }
-
-    public enum BlockColor
-    {
-        Red,
-        Green,
-        Blue,
-        Yellow
-    }
+    public struct Block : IComponentData {}
+    
+    
 }

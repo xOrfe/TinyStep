@@ -25,10 +25,7 @@ namespace TinyStep.Tweener
             in float duration)
         {
             entityCommandBuffer.AddComponent(entity,new MoveOrder(start,end,duration) );
-        }
-        public static float GetTime()
-        {
-            return Time.time;
+            entityCommandBuffer.AddComponent<MoveOrderOnStart>(entity);
         }
         
     }
