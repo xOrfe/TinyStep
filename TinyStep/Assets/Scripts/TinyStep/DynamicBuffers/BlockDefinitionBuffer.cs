@@ -1,5 +1,6 @@
 ﻿using System;
 using TinyStep.Utils;
+using Unity.Collections;
 using Unity.Entities;
 
 namespace TinyStep.DynamicBuffers
@@ -10,6 +11,7 @@ namespace TinyStep.DynamicBuffers
         public Entity Entity;
         public bool Existence;
         public int PosIndex;
+        public int CrewIndex;
         public BlockType BlockType;
         public BlockColor BlockColor;
         public BlockObstacleType BlockObstacleType;
@@ -19,6 +21,7 @@ namespace TinyStep.DynamicBuffers
             Entity = entity;
             Existence = true;
             PosIndex = posIndex;
+            CrewIndex = -1;
             BlockType = BlockType.Block;
             BlockColor = (BlockColor)blockColor;
             BlockObstacleType = BlockObstacleType.Empty;
@@ -28,11 +31,14 @@ namespace TinyStep.DynamicBuffers
             Entity = Entity.Null;
             Existence = existence;
             PosIndex = -1;
+            CrewIndex = -1;
             BlockType = BlockType.Block;
             BlockColor = BlockColor.Empty;
             BlockObstacleType = BlockObstacleType.Empty;
         }
     }
+
+    
     public enum BlockType
     {
         Block,

@@ -52,6 +52,7 @@ namespace TinyStep
             }
 
             EntityManager.RemoveComponent<SetFallDowns>(blockMatrixEntity);
+            EntityManager.AddComponent<SetCrews>(blockMatrixEntity);
             blockMatrixData.CompleteFallDown();
             SetSingleton(blockMatrixData);
             _endSimulationEntityCommandBufferSystem.AddJobHandleForProducer(this.Dependency);

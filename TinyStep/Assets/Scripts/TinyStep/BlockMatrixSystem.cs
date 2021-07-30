@@ -58,7 +58,8 @@ namespace TinyStep
             {
                 CreateBlock(ecb,blockMatrixEntity,i,true);
             }
-            
+            ecb.AddComponent<SetCrews>(blockMatrixEntity);
+
             _endSimulationEntityCommandBufferSystem.AddJobHandleForProducer(this.Dependency);
         }
         
@@ -89,16 +90,24 @@ namespace TinyStep
             var activeInput = GetSingleton<InputData>();
             
             DynamicBuffer<BlockDefinitionBuffer> blockDefinitionBuffers = GetBufferFromEntity<BlockDefinitionBuffer>()[blockMatrixEntity];
-            
+            var blockCrewBuffers = GetBufferFromEntity<BlockCrewBuffer>()[blockMatrixEntity];
+
             if (!activeInput.IsTouchExecuted)
             {
                 int touchIndex = BlockMatrixUtilities.GetIndexFromWorld(activeInput.Pos,blockMatrixData.BlockMatrixDefinition.OneBlockScale,blockMatrixData.BlockMatrixDefinition.MatrixScale);
                 if(touchIndex < 0 || touchIndex > blockMatrixData.BlockMatrixDefinition.MatrixLength - 1) return;
                 if(blockDefinitionBuffers[touchIndex].Existence)
                 {
-                    ecb.DestroyEntity(blockDefinitionBuffers[touchIndex].Entity);
-                    blockDefinitionBuffers[touchIndex] = new BlockDefinitionBuffer( false);
-                    EntityManager.AddComponent<SetFallDowns>(blockMatrixEntity);
+                    int crewIndex = blockDefinitionBuffers[touchIndex].CrewIndex;
+                    if (crewIndex != -1)
+                    {
+                        foreach (var i in blockCrewBuffers[crewIndex].Crew)
+                        {
+                            ecb.DestroyEntity(blockDefinitionBuffers[i].Entity);
+                            blockDefinitionBuffers[i] = new BlockDefinitionBuffer( false);
+                        }
+                        EntityManager.AddComponent<SetFallDowns>(blockMatrixEntity);
+                    }
                 }
                 activeInput.IsTouchExecuted = true;
                 SetSingleton(activeInput);

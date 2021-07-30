@@ -1,10 +1,9 @@
 ﻿using System;
-using TinyStep.Tweener;
 using Unity.Burst;
 using Unity.Entities;
 using Unity.Mathematics;
 
-namespace TinyStep
+namespace TinyStep.Tweener
 {
     [Serializable]
     public struct MoveOrder : IComponentData
