@@ -19,18 +19,7 @@ namespace TinyStep
                 int crewCount = 0;
                 int matrixLength = BlockMatrixData.BlockMatrixDefinition.MatrixLength;
                 int2 matrixScale = BlockMatrixData.BlockMatrixDefinition.MatrixScale;
-
-                for (int i = 0; i < matrixLength; i++)
-                {
-                    BlockDefinitionBuffer blockDefinitionBuffer = BlockDefinitionBuffers[i];
-                    blockDefinitionBuffer.CrewIndex = -1;
-                    BlockDefinitionBuffers[i] = blockDefinitionBuffer;
-                }
-
-                foreach (var s in BlockDefinitionBuffers)
-                {
-                    Debug.Log(s.CrewIndex);
-                }
+                
                 for (int i = 0; i < matrixLength; i++)
                 {
                     int rightBlockIndex = i + 1;
@@ -75,12 +64,14 @@ namespace TinyStep
                 blockDefinitions[b2] = b2Def;
                 
                 crewCount++;
+                return;
             }
             if (blockDefinitions[b1].CrewIndex != -1 && blockDefinitions[b2].CrewIndex == -1)
             {
                 BlockDefinitionBuffer b2Def = blockDefinitions[b2];
                 b2Def.CrewIndex = blockDefinitions[b1].CrewIndex;
                 blockDefinitions[b2] = b2Def;
+                return;
             }
             if (blockDefinitions[b1].CrewIndex == -1 && blockDefinitions[b2].CrewIndex != -1)
             {
@@ -117,7 +108,12 @@ namespace TinyStep
             
             blockMatrixData.StartSetCrews();
             
-            
+            for (int i = 0; i < blockMatrixData.BlockMatrixDefinition.MatrixLength; i++)
+            {
+                BlockDefinitionBuffer blockDefinitionBuffer = blockDefinitionBuffers[i];
+                blockDefinitionBuffer.CrewIndex = -1;
+                blockDefinitionBuffers[i] = blockDefinitionBuffer;
+            }
             
             SetCrewsJob setCrewsJob = new SetCrewsJob
             {

@@ -26,7 +26,7 @@ namespace Authoring
                 RedBlockEntity = conversionSystem.GetPrimaryEntity(redBlockPrefab),
                 GreenBlockEntity = conversionSystem.GetPrimaryEntity(greenBlockPrefab),
                 BlueBlockEntity = conversionSystem.GetPrimaryEntity(blueBlockPrefab),
-                YellowBlockEntity = conversionSystem.GetPrimaryEntity(blueBlockPrefab),
+                YellowBlockEntity = conversionSystem.GetPrimaryEntity(yellowBlockPrefab),
             });
 
         }
