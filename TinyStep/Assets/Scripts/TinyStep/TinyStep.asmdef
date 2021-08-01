@@ -11,13 +11,15 @@
         "Unity.Tiny.Core",
         "Unity.Tiny.Rendering",
         "Unity.Tiny.Rendering.Native",
-        "Unity.Tiny.Image2D",
         "Unity.Tiny.Audio",
         "Unity.Tiny.Input",
         "Unity.Burst",
         "Unity.Tiny.2D",
         "Unity.Tiny.2D.Native",
-        "Unity.2D.Entities.Physics"
+        "Unity.2D.Entities.Physics",
+        "Unity.Tiny.Image2D",
+        "Unity.Tiny.Image2D.Native",
+        "Unity.Tiny.Image2D.Web"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

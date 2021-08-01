@@ -1,6 +1,4 @@
-﻿
-using System;
-using Unity.Collections;
+﻿using System;
 using Unity.Entities;
 namespace TinyStep
 {
@@ -16,4 +14,6 @@ namespace TinyStep
     [Serializable] public struct MoveOrderOnComplete : IComponentData {}
     [Serializable] public struct SetCrews : IComponentData {}
     [Serializable] public struct SetFallDowns : IComponentData {}
+    [Serializable] public struct SetCreateBlocks : IComponentData {}
+    
 }

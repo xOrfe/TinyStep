@@ -1,10 +1,7 @@
 ﻿using System.Collections.Generic;
 using TinyStep;
-using Unity.Collections;
 using Unity.Entities;
-using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Authoring
 {
@@ -26,17 +23,18 @@ namespace Authoring
                 RedBlockEntity = conversionSystem.GetPrimaryEntity(redBlockPrefab),
                 GreenBlockEntity = conversionSystem.GetPrimaryEntity(greenBlockPrefab),
                 BlueBlockEntity = conversionSystem.GetPrimaryEntity(blueBlockPrefab),
-                YellowBlockEntity = conversionSystem.GetPrimaryEntity(yellowBlockPrefab),
+                YellowBlockEntity = conversionSystem.GetPrimaryEntity(yellowBlockPrefab)
             });
 
         }
 
         public void DeclareReferencedPrefabs(List<GameObject> referencedPrefabs)
         {
-                referencedPrefabs.Add(redBlockPrefab);
-                referencedPrefabs.Add(greenBlockPrefab);
-                referencedPrefabs.Add(blueBlockPrefab);
-                referencedPrefabs.Add(yellowBlockPrefab);
+            
+            referencedPrefabs.Add(redBlockPrefab);
+            referencedPrefabs.Add(greenBlockPrefab);
+            referencedPrefabs.Add(blueBlockPrefab);
+            referencedPrefabs.Add(yellowBlockPrefab);
         }
     }
 }

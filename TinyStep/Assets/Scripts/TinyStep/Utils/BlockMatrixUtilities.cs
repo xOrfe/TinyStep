@@ -1,5 +1,4 @@
-﻿using Unity.Burst;
-using Unity.Mathematics;
+﻿using Unity.Mathematics;
 
 namespace TinyStep.Utils
 {
@@ -9,7 +8,7 @@ namespace TinyStep.Utils
         {
             return GetBlockPositionLocal(GetMatrixCoordFromIndex(index,matrixScale),matrixScale,oneBlockScale);
         }
-        private static float3 GetBlockPositionLocal(int2 matrixPos,int2 matrixScale,float oneBlockScale)
+        public static float3 GetBlockPositionLocal(int2 matrixPos,int2 matrixScale,float oneBlockScale)
         {
             float3 normalPos = new float3(matrixPos.x * oneBlockScale + oneBlockScale / 2,
                                    matrixPos.y * oneBlockScale + oneBlockScale / 2, 0)

@@ -1,4 +1,5 @@
 ﻿using TinyStep.DynamicBuffers;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
@@ -7,8 +8,11 @@ using Unity.Tiny;
 
 namespace TinyStep
 {
+    
+    [BurstCompile][UpdateAfter(typeof(BlockSpawnSystem))]
     public class SetCrewsJobSystem : JobComponentSystem
     {
+        [BurstCompile]
         public struct SetCrewsJob : IJob
         {
             public BlockMatrixData BlockMatrixData;
@@ -50,7 +54,8 @@ namespace TinyStep
                 
             }
         }
-
+        
+        [BurstCompile]
         public static void MatchBlocks(ref NativeArray<BlockDefinitionBuffer> blockDefinitions,ref int crewCount,int b1,int b2)
         {
             if (blockDefinitions[b1].CrewIndex == -1 && blockDefinitions[b2].CrewIndex == -1)
@@ -94,37 +99,45 @@ namespace TinyStep
                 }
             }
         }
-
+        
+        [BurstCompile]
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
             var setCrewCount = GetEntityQuery(typeof(SetCrews)).CalculateEntityCountWithoutFiltering();
             if (setCrewCount == 0) return inputDeps;
             
             var blockMatrixEntity = GetSingletonEntity<BlockMatrixData>();
-            
             var blockMatrixData = GetSingleton<BlockMatrixData>();
+
+            if (blockMatrixData.CanIExecuteSetCrews)
+            {
+                blockMatrixData.StartSetCrews();
+                SetSingleton(blockMatrixData);
+            }
+            else return inputDeps;
+            Debug.Log("SetCrews");
             
-            var blockDefinitionBuffers = GetBufferFromEntity<BlockDefinitionBuffer>()[blockMatrixEntity];
-            
-            blockMatrixData.StartSetCrews();
-            
+            var blockDefinitionBuffersArr = GetBufferFromEntity<BlockDefinitionBuffer>()[blockMatrixEntity].ToNativeArray(Allocator.TempJob);
+
             for (int i = 0; i < blockMatrixData.BlockMatrixDefinition.MatrixLength; i++)
             {
-                BlockDefinitionBuffer blockDefinitionBuffer = blockDefinitionBuffers[i];
+                BlockDefinitionBuffer blockDefinitionBuffer = blockDefinitionBuffersArr[i];
                 blockDefinitionBuffer.CrewIndex = -1;
-                blockDefinitionBuffers[i] = blockDefinitionBuffer;
+                blockDefinitionBuffersArr[i] = blockDefinitionBuffer;
             }
             
             SetCrewsJob setCrewsJob = new SetCrewsJob
             {
                 BlockMatrixData = blockMatrixData,
-                BlockDefinitionBuffers = blockDefinitionBuffers.ToNativeArray(Allocator.TempJob)
+                BlockDefinitionBuffers = blockDefinitionBuffersArr
             };
             
             var jobHandle = setCrewsJob.Schedule(inputDeps);
             
             jobHandle.Complete();
             
+            var blockDefinitionBuffers = GetBufferFromEntity<BlockDefinitionBuffer>()[blockMatrixEntity];
+
             blockDefinitionBuffers.Clear();
             blockDefinitionBuffers.AddRange(setCrewsJob.BlockDefinitionBuffers);
             setCrewsJob.BlockDefinitionBuffers.Dispose();

@@ -10,7 +10,11 @@
         "Unity.2D.Entities",
         "Unity.2D.Entities.Runtime",
         "Unity.2D.Entities.Physics",
-        "TinyStep"
+        "TinyStep",
+        "Unity.Tiny.Image2D.Native",
+        "Unity.Tiny.Image2D",
+        "Unity.Tiny.Image2D.Authoring",
+        "Unity.Tiny.Image2D.Authoring.Tests"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

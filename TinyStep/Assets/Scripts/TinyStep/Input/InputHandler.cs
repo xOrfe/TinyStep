@@ -1,11 +1,15 @@
-﻿using TinyStep.Utils;
+﻿using TinyStep.DynamicBuffers;
+using TinyStep.Utils;
+using Unity.Burst;
 using Unity.Entities;
+using Unity.Tiny;
 
 namespace TinyStep.Input
 {
+    [BurstCompile]
     public class InputHandler : SystemBase
     {
-        protected override void OnStartRunning()
+        protected override void OnCreate()
         {
             RequireSingletonForUpdate<BlockMatrixData>();
             RequireSingletonForUpdate<InputData>();
@@ -14,17 +18,46 @@ namespace TinyStep.Input
         protected override void OnUpdate()
         {
             var blockMatrixData = GetSingleton<BlockMatrixData>();
-            if (blockMatrixData.MovingBlockCount > 0 || blockMatrixData.DestroyedBlockCount > 0) return;
+            var blockMatrixEntity = GetSingletonEntity<BlockMatrixData>();
+            var activeInput = GetSingleton<InputData>();
+
+            if (!blockMatrixData.CanIExecuteInputHandle || activeInput.IsTouchExecuted) return;
             
-            var input = World.GetExistingSystem<Unity.Tiny.Input.InputSystem>();
-            if (InputUtil.GetInputDown(input))
+            int touchIndex = BlockMatrixUtilities.GetIndexFromWorld(activeInput.Pos,
+                blockMatrixData.BlockMatrixDefinition.OneBlockScale, blockMatrixData.BlockMatrixDefinition.MatrixScale);
+            if (touchIndex < 0 || touchIndex > blockMatrixData.BlockMatrixDefinition.MatrixLength - 1) return;
+            Debug.Log("InputHandler");
+
+            blockMatrixData.StartInputHandle();
+            
+            DynamicBuffer<BlockDefinitionBuffer> blockDefinitionBuffers =
+                GetBufferFromEntity<BlockDefinitionBuffer>(false)[blockMatrixEntity];
+            
+            if (blockDefinitionBuffers[touchIndex].Existence)
             {
-                var pos = CameraUtil.ScreenPointToWorldPoint(World, InputUtil.GetInputPosition(input));
-                var activeInput = GetSingleton<InputData>();
-                activeInput.Pos = pos;
-                activeInput.IsTouchExecuted = false;
+                int crewIndex = blockDefinitionBuffers[touchIndex].CrewIndex;
+                if (crewIndex != -1)
+                {
+                    for (int i = 0; i < blockDefinitionBuffers.Length; i++)
+                    {
+                        if (blockDefinitionBuffers[i].CrewIndex == crewIndex)
+                        {
+                            EntityManager.DestroyEntity(blockDefinitionBuffers[i].Entity);
+                            blockDefinitionBuffers =
+                                GetBufferFromEntity<BlockDefinitionBuffer>(false)[blockMatrixEntity];
+                            blockDefinitionBuffers[i] = new BlockDefinitionBuffer(false);
+                            blockMatrixData.BlockDestroyed();
+                        }
+                    }
+                    
+                    EntityManager.AddComponent<SetFallDowns>(blockMatrixEntity);
+                }
+                activeInput.IsTouchExecuted = true;
                 SetSingleton(activeInput);
             }
+            
+            blockMatrixData.CompleteInputHandle();
+            SetSingleton(blockMatrixData);
         }
     }
 }

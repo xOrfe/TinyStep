@@ -1,7 +1,4 @@
-﻿using System;
-using TinyStep.Utils;
-using Unity.Collections;
-using Unity.Entities;
+﻿using Unity.Entities;
 
 namespace TinyStep.DynamicBuffers
 {

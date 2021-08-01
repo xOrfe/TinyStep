@@ -7,10 +7,14 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Transforms;
 
+[UpdateAfter(typeof(SetFallDownSystem))]
 public class SetCrewsSystem : SystemBase
 {
     protected override void OnUpdate()
     {
+        // Forvarded to Job System, check "SetCrewsJobSystem"
+        // This folder still here bcz this is usable for debugging things 
+        
         return;
         var setCrewCount = GetEntityQuery(typeof(SetCrews)).CalculateEntityCountWithoutFiltering();
         if (setCrewCount == 0) return;
@@ -73,6 +77,7 @@ public class SetCrewsSystem : SystemBase
         BlockDefinitionBuffers.Dispose();
         
         EntityManager.RemoveComponent<SetCrews>(blockMatrixEntity);
+        
         blockMatrixData.CompleteSetCrews();
         SetSingleton(blockMatrixData);
     }
